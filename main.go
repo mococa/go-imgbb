@@ -2,7 +2,8 @@ package goimgbb
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
+
 	"net/http"
 	"net/url"
 )
@@ -27,14 +28,13 @@ type ImgbbResponseData struct {
 	DisplayURL string `json:"display_url"`
 	DeleteURL  string `json:"delete_url"`
 
-	Expiration string `json:"expiration"`
+	Expiration int `json:"expiration"`
 
-	Height string `json:"height"`
-	Width  string `json:"width"`
+	Height int `json:"height"`
+	Width  int `json:"width"`
 
-	Image  ImgbbImage `json:"image"`
-	Thumb  ImgbbImage `json:"thumb"`
-	Medium ImgbbImage `json:"medium"`
+	Image ImgbbImage `json:"image"`
+	Thumb ImgbbImage `json:"thumb"`
 }
 
 /*
@@ -56,15 +56,15 @@ func Upload(imageBBkey string, base64Image string) (*ImgbbResponse, error) {
 	}
 
 	// Read response body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	// Transform response body into type
-	imgbb_response := ImgbbResponse{}
+	imgbb_response := &ImgbbResponse{}
 
-	err = json.Unmarshal(body, &imgbb_response)
+	err = json.Unmarshal(body, imgbb_response)
 	if err != nil {
 		return nil, err
 	}
@@ -72,5 +72,5 @@ func Upload(imageBBkey string, base64Image string) (*ImgbbResponse, error) {
 	// Close body
 	defer resp.Body.Close()
 
-	return &imgbb_response, nil
+	return imgbb_response, nil
 }
